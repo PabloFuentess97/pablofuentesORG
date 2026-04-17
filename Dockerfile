@@ -13,7 +13,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 FROM base AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci --no-audit --no-fund
+# --ignore-scripts skips the postinstall hook (prisma generate) because
+# the schema isn't copied yet at this stage. We run `prisma generate`
+# explicitly in the builder stage below.
+RUN npm ci --no-audit --no-fund --ignore-scripts
 
 ################################################################################
 # 3. Builder — compile Prisma client and build Next.js in standalone mode
