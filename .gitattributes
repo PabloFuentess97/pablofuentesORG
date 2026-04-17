@@ -1,0 +1,17 @@
+# Auto-detect text files and normalize line endings to LF on commit
+* text=auto eol=lf
+
+# Shell scripts MUST be LF — otherwise they break inside Linux containers
+*.sh text eol=lf
+docker-entrypoint.sh text eol=lf
+
+# Binary files — leave alone
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
