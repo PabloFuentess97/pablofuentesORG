@@ -51,17 +51,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Prisma — schema + CLI + engine, needed to run `migrate deploy` on boot.
-# Prisma 7 + @prisma/adapter-pg: no native Rust query engine at runtime.
-# The generated client lives in src/generated/prisma and is traced by
-# Next.js standalone output automatically — no separate COPY needed.
+# Prisma — schema + config + full node_modules for `migrate deploy` at boot.
+# Why the whole node_modules: @prisma/config in Prisma 7 has a deep transitive
+# dep tree (effect, c12, dotenv, ...) that's fragile to cherry-pick. Copying
+# the full set from the builder guarantees the CLI resolves cleanly.
+# The standalone output already bundles its own slim node_modules at the root;
+# overlaying the full one on top is safe (superset).
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-# Transitive deps used by prisma.config.ts loader
-COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
-COPY --from=builder /app/node_modules/c12 ./node_modules/c12
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Entrypoint that runs migrations before starting the server
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./docker-entrypoint.sh
