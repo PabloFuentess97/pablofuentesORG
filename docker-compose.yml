@@ -48,8 +48,9 @@ services:
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
       CONTACT_NOTIFY_EMAIL: ${CONTACT_NOTIFY_EMAIL}
     ports:
-      # Bind to loopback only. Nginx on the host terminates TLS and proxies here.
-      - "127.0.0.1:3000:3000"
+      # Publicly exposed on 3000. Cuando pongas Nginx delante, cambia a
+      # "127.0.0.1:3000:3000" para que solo lo alcance el reverse proxy.
+      - "3000:3000"
     networks:
       - app-net
 
