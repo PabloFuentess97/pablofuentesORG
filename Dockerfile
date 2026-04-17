@@ -60,6 +60,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+# Prisma 7's generated client (used by the seed script at runtime).
+# Next.js standalone already has its own copy bundled, but seed.ts imports
+# it directly via relative path, so we need it at /app/src/generated too.
+COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
 
 # Entrypoint that runs migrations before starting the server
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./docker-entrypoint.sh
